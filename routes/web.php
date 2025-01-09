@@ -1,24 +1,20 @@
 <?php
 
-use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+use Illuminate\Foundation\Application;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+    $user = auth()->check() ? auth()->user() : null; // Kullanıcı giriş yapmışsa bilgileri al
+    return view('welcome.index', compact('user')); // 'user' string olarak compact'e verilmeli
+})->name('welcome');
 
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
-])->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+
+Route::get('/profile', function () {
+    return view('user.index');
 });
+Route::get('/register', [UserController::class, 'register']);
+Route::get('/login', [UserController::class, 'login']);
+Route::post('/create', [UserController::class, 'store'])->name('create');
+Route::post('/loginin', [UserController::class, 'loginin'])->name('loginin');
